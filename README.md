@@ -1,6 +1,6 @@
-# Project Title
+# Talk Like a Pi-Rate
 
-Pirate Game for Talk Like a Pirate Day
+Game for Talk Like a Pirate Day
 
 ## Getting Started
 
