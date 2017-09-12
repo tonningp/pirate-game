@@ -45,7 +45,7 @@ class WaveAnimation(QGraphicsObject):
         self.ship1.moveTo(QPointF(self.r.left(),self.r.center().y()))
         self.wavePath = QPainterPath()
         #self.fn = math.sin
-        self.fn = lambda x: 2 * math.sin(x*4)**2
+        self.fn = lambda x: 2 * math.sin(x*2)
         color = Qt.blue
         self.color = color
         self.xres = 1.67
