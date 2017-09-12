@@ -1,0 +1,24 @@
+<RCC>
+	<qresource prefix="/">
+		<file>images/cheese.jpg</file>
+		<file>images/cheeseImage.png</file>
+		<file>images/desktop.png</file>
+		<file>images/10x10maze.v1.svg</file>
+		<file>images/10x10maze.v2.svg</file>
+		<file>images/Pirate-ship.svg</file>
+		<file>images/Pirate.svg</file>
+		<file>images/Treasure_map.svg</file>
+		<file>images/cutlass1.svg</file>
+		<file>images/cutlass2.svg</file>
+		<file>images/icons/home64x64.png</file>
+		<file>images/icons/run64x64.png</file>
+		<file>images/icons/exit64x64.png</file>
+		<file>images/icons/edit64x64.png</file>
+		<file>images/icons/pdf64x64.png</file>
+		<file>images/icons/print64x64.png</file>
+		<file>images/icons/help64x64.png</file>
+		<file>images/icons/about64x64.png</file>
+		<file>images/icons/maze64x64.png</file>
+	</qresource>
+</RCC>
+
