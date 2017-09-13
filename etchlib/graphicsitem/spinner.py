@@ -17,6 +17,9 @@ from PyQt5.QtWidgets import (
 
 class Spinner(QGraphicsObject):
     tickSignal = pyqtSignal(int)
+    prizes = {
+        '0' : ''
+    }
     def __init__(self,file,scale=1.0,parent=None):
         super(Spinner, self).__init__()
         self.s = svg.Item(file,scale,self)

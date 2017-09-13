@@ -39,7 +39,7 @@ class WaveAnimation(QGraphicsObject):
     BoundingRect = QRectF(-width/2,-height/2,width,height)
     def __init__(self,parent=None):
         super(WaveAnimation, self).__init__()
-        self.ship1 = Ship(":/images/Pirate-ship.svg",0.6,self)
+        self.ship1 = Ship(":/images/Pirate-ship.svg",0.5,self)
         self.ship1.movable()
         self.r = self.boundingRect()
         self.ship1.moveTo(QPointF(self.r.left(),self.r.center().y()))

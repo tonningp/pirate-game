@@ -67,6 +67,7 @@ http://www.python-course.eu/index.php
         from etchlib.views.mainview import View as MainView
         from etchlib.graphicsitem.svg import Item as SvgItem
         from etchlib.graphicsitem.spinner import Spinner
+        from etchlib.graphicsitem.speechbubble import Bubble
         from etchlib.graphicsitem.waveanimation import WaveAnimation
         from gameitems.wordboard import WordBoard
         scene = MScene(QRectF(-self.size().width()/2,-self.size().height()/2,self.size().width(),self.size().height()))
@@ -74,18 +75,25 @@ http://www.python-course.eu/index.php
         self.treasure_map.movable()
         self.treasure_map.setPos(QPointF(-self.size().width()/2,-self.size().height()/2))
         self.pirate = SvgItem(":/images/Pirate.svg",0.75)
+        self.speechbubble = Bubble()
+        transform = QTransform()
+        transform.scale(2.0, 1.25)
+        self.speechbubble.setTransform(transform);
+        self.speechbubble.movable()
+        self.speechbubble.setPos(QPointF(-self.size().width()/2+1.5*self.pirate.boundingRect().width(),-600))
         self.pirate.movable()
-        self.pirate.setPos(QPointF(-self.size().width()/2,-self.size().height()/2))
+        self.pirate.setPos(QPointF(-self.size().width()/2+75,-350))
         self.cutlass1 = Spinner(":/images/cutlass1.svg",0.75)
         self.cutlass1.movable(True)
-        self.cutlass1.setPos(QPointF(-self.size().width()/2,-350))
+        self.cutlass1.setPos(QPointF(-self.size().width()/2,self.treasure_map.boundingRect().top()))
         self.pirate.onLeftClick(lambda x: self.cutlass1.spin())
         scene.addItem(self.treasure_map)
         scene.addItem(self.pirate)
+        scene.addItem(self.speechbubble)
         scene.addItem(self.cutlass1)
-        self.wordboard = WordBoard({"word1":"circumference / diameter"})
-        self.wordboard.setPos(QPointF(self.cutlass1.pos().x()+self.cutlass1.boundingRect().width()+50,-350))
-        scene.addItem(self.wordboard)
+        #self.wordboard = WordBoard({"word1":"circumference / diameter"})
+        #self.wordboard.setPos(QPointF(self.cutlass1.pos().x()+self.cutlass1.boundingRect().width()+50,-350))
+        #scene.addItem(self.wordboard)
         self.wave = WaveAnimation()
         self.cutlass1.connectFunc(self.wave.updateTick)
         self.wave.movable(True)
