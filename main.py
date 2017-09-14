@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 import sys
 import resources
-
+from questions import questions
+from etchlib.serialcomm import SerialManager
 from PyQt5.QtCore import (
         Qt,
         QTime,
@@ -28,7 +29,6 @@ from PyQt5.QtWidgets import (
         QStyle,
         QAction
 )
-
 
 class App(QMainWindow):
     """
@@ -75,7 +75,7 @@ http://www.python-course.eu/index.php
         self.treasure_map.movable()
         self.treasure_map.setPos(QPointF(-self.size().width()/2,-self.size().height()/2))
         self.pirate = SvgItem(":/images/Pirate.svg",0.75)
-        self.speechbubble = Bubble()
+        self.speechbubble = Bubble(questions)
         transform = QTransform()
         transform.scale(2.0, 1.25)
         self.speechbubble.setTransform(transform);
@@ -86,6 +86,7 @@ http://www.python-course.eu/index.php
         self.cutlass1 = Spinner(":/images/cutlass1.svg",0.75)
         self.cutlass1.movable(True)
         self.cutlass1.setPos(QPointF(-self.size().width()/2,self.treasure_map.boundingRect().top()))
+        #self.cutlass1.randomSpin()
         self.pirate.onLeftClick(lambda x: self.cutlass1.spin())
         scene.addItem(self.treasure_map)
         scene.addItem(self.pirate)

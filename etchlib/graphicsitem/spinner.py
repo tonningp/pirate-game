@@ -66,7 +66,10 @@ class Spinner(QGraphicsObject):
         if self.currentSpin > self.spinCount-1:
             self.currentSpin = 0
 
-
+    def randomSpin(self):
+        stop = random.randint(50,75)
+        print(stop)
+        
     def boundingRect(self):
         r = self.s.boundingRect()
         return QRectF(r.left(),r.top(),r.width()*(self.s.scale),r.width()*(self.s.scale))

@@ -13,16 +13,23 @@ from PyQt5.QtGui import(
     QFont
 )
 from PyQt5.QtWidgets import (
+    QWidget,
     QGraphicsObject,
+    QGraphicsProxyWidget,
     QGraphicsTextItem
     )
 
 class Bubble(QGraphicsObject):
 
-    def __init__(self,parent=None):
+    def __init__(self,questions,scale=1.0,parent=None):
         super(Bubble, self).__init__()
-        self.s = svg.Item(":/images/speech_bubble2.svg",2.0,self)
+        self.s = svg.Item(":/images/speech_bubble2.svg",scale,self)
         self.s.setPos(QPointF(self.boundingRect().left(),self.boundingRect().top()))
+        self.questions = questions
+        #self.button = QPushButton('Button', super(Bubble,self))
+        #self.button.setToolTip('This is an example button')
+        #self.button.move(100,70)
+
 
 
     def boundingRect(self):
@@ -34,4 +41,4 @@ class Bubble(QGraphicsObject):
         return self
 
     def paint(self, painter, option, widget):
-    	painter.drawRect(self.boundingRect())
+        painter.drawRect(self.boundingRect())
