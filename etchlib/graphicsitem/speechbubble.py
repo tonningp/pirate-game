@@ -40,5 +40,5 @@ class Bubble(QGraphicsObject):
         self.setFlag(QGraphicsObject.ItemIsMovable,m)
         return self
 
-    def paint(self, painter, option, widget):
-        painter.drawRect(self.boundingRect())
+    # def paint(self, painter, option, widget):
+    #     painter.drawRect(self.boundingRect())

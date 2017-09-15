@@ -40,24 +40,8 @@ class SerialManager:
 		        time.sleep(0.5)  #give the serial port sometime to receive the data
 		        numOfLines = 0
 		        while True:
-#		            response = self.ser.readline().strip()
-		            buffer = ""
-		            while True:
-		            	c = self.ser.read()
-		            	if c == b's':
-			            	c = self.ser.read()
-			            	if c == b':':
-				            	c = self.ser.read()
-				            	if c in [b'0',b'1',b'2',b'3',b'4',b'5',b'6',b'7',b'8',b'9']:
-			            			print("spin:"+str(c))
-		            				buffer += str(c)
-		            				break
-		            #print("read data: {0}".format(str(response)))
-		            #print("read data: {0}".format(len(response)))
-		            #print(buffer)
-		            numOfLines = numOfLines + 1
-		            #if (numOfLines >= 5):
-		            #    break
+		            response = self.ser.readline().strip()
+		            print("{0}".format(str(response)))
 		        self.ser.close()
 		    #except Exception as e1:
 		    #    print("error communicating...: " + str(e1))
