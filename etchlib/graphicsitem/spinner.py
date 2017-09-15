@@ -20,25 +20,30 @@ class Spinner(QGraphicsObject):
     prizes = {
         '0' : ''
     }
+    points = [
+        'Bankrupt',
+        100,
+        200,
+    ]
+
     def __init__(self,file,scale=1.0,parent=None):
         super(Spinner, self).__init__()
-        self.s = svg.Item(file,scale,self)
-        self.s.setPos(self.s.pos().x(),-self.boundingRect().width()/4)
+        self.compass = svg.Item(":/images/compass.svg",1.0,self)
+        self.compass.setTransform(self.compass.transform().scale(6.25,7.25).translate(-5.3,-16.0))
+        self.spinner = svg.Item(file,scale,self)
+        self.spinner.setPos(self.spinner.pos().x(),-self.boundingRect().width()/4)
         self.rect = self.boundingRect()
         self.center = self.rect.center()
         self.radius = self.rect.width()/2
         self.numbers = []
-        self.spinCount = 48
+        self.spinCount = 48 # run for 2 periods for a longer wave
         self.currentSpin = 0
-        div = 15
+        self.div = 15
         for a in range(self.spinCount//2):
-            angle = a*div + 5
-            theta = angle*math.pi/180
+            theta = self.toRad(a*self.div + 5) 
             textPoint = QPointF(self.center.x() + self.radius*math.cos(theta)-20,self.center.y() + self.radius*math.sin(theta)-10)
-            item = QGraphicsTextItem("{0}".format(angle),self)
-            #item = QGraphicsTextItem("{0}".format(random.randint(0,500)),self)
-            #item.setHtml('<span style="color:black;size:24px;font-weight:bold;">{0}</span>'.format(random.randint(0,100)))
-            item.setFont(QFont("Helvetica [Cronyx]", 36))
+            item = QGraphicsTextItem("{0}".format(a+1),self)
+            item.setFont(QFont("Comic Sans MS", 36))
             item.setDefaultTextColor(Qt.yellow)
             self.numbers.append(item)
             item.setPos(textPoint)
@@ -49,17 +54,19 @@ class Spinner(QGraphicsObject):
     def connectFunc(self,fn):
         self.tickSignal.connect(fn)
 
+    def toRad(self,deg):
+        return deg*math.pi/180
+
     def spin(self):
         for i in self.numbers:
             i.setDefaultTextColor(Qt.black)
-        obj = self.s
-        scale = obj.scale
-        r = obj.boundingRect() 
-        transform = obj.transform() \
-                        .translate(scale*r.width()/2,scale*r.height()/2) \
-                        .rotate(obj.rotation()+15) \
-                        .translate(-scale*r.width()/2,-scale*r.height()/2)
-        obj.setTransform(transform)
+        scale = self.spinner.scale
+        r = self.spinner.boundingRect() 
+        transform = self.spinner.transform() \
+                        .translate(self.spinner.scale*r.width()/2,self.spinner.scale*r.height()/2) \
+                        .rotate(self.spinner.rotation()+self.div) \
+                        .translate(-self.spinner.scale*r.width()/2,-self.spinner.scale*r.height()/2)
+        self.spinner.setTransform(transform)
         self.tickSignal.emit(self.currentSpin)
         self.numbers[self.currentSpin%(self.spinCount//2)].setDefaultTextColor(Qt.yellow)
         self.currentSpin += 1
@@ -71,27 +78,27 @@ class Spinner(QGraphicsObject):
         print(stop)
         
     def boundingRect(self):
-        r = self.s.boundingRect()
-        return QRectF(r.left(),r.top(),r.width()*(self.s.scale),r.width()*(self.s.scale))
+        r = self.spinner.boundingRect()
+        return QRectF(r.left(),r.top(),r.width()*(self.spinner.scale),r.width()*(self.spinner.scale))
 
     def movable(self,m=True):
         self.setFlag(QGraphicsObject.ItemIsMovable,m)
         return self
 
     def paint(self, painter, option, widget):
-        painter.setBrush(Qt.blue)
-        painter.drawEllipse(self.rect)
-        div = 15
-        for a in range(self.spinCount):
-            angle = a*div
-            theta = angle*math.pi/180
-            startAngle = angle * 16
-            spanAngle = div*16
-            if a % 2:
-                painter.setBrush(Qt.red)
-                painter.setPen(Qt.red)
-            else:
-               painter.setBrush(Qt.blue)
-               painter.setPen(Qt.blue)
-            painter.drawPie(self.rect, startAngle, spanAngle);
-        painter.drawEllipse(QRectF(self.rect.width()/2-50,self.rect.height()/2-50,100,100))
+        #painter.drawEllipse(self.rect)
+        # for a in range(self.spinCount):
+        #     angle = a*self.div
+        #     startAngle = angle * 16
+        #     spanAngle = self.div*16
+        #     if a % 2:
+        #         painter.setBrush(Qt.red)
+        #         painter.setPen(Qt.red)
+        #     else:
+        #        painter.setBrush(Qt.blue)
+        #        painter.setPen(Qt.blue)
+            #painter.drawPie(self.rect, startAngle, spanAngle);
+        painter.setBrush(Qt.white)
+        painter.drawEllipse(QRectF(self.rect.width()/2-300,self.rect.height()/2-285,600,600))
+        painter.setBrush(Qt.red)
+        painter.drawEllipse(QRectF(self.rect.width()/2-50,self.rect.height()/2-35,100,100))

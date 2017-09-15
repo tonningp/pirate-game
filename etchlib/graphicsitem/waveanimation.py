@@ -40,7 +40,6 @@ class WaveAnimation(QGraphicsObject):
     def __init__(self,parent=None):
         super(WaveAnimation, self).__init__()
         self.ship1 = Ship(":/images/Pirate-ship.svg",0.5,self)
-        self.ship1.movable()
         self.r = self.boundingRect()
         self.ship1.moveTo(QPointF(self.r.left(),self.r.center().y()))
         self.wavePath = QPainterPath()
@@ -56,6 +55,7 @@ class WaveAnimation(QGraphicsObject):
         self.period = 720
         self.currentTick = 0
         self.factor = 1
+        self.div = 15
         for d in range(self.start,self.period):
             self.wavePath.moveTo(lastPoint)
             nextPoint = QPointF(self.r.left() + self.xres * d,-1*self.yres * self.fn(d*math.pi/180.0))
@@ -71,16 +71,7 @@ class WaveAnimation(QGraphicsObject):
 
     @pyqtSlot(int)
     def updateTick(self,spin):
-
-   #     if direction == 1:
-   #         mult = 1
-   #     else:
-   #         mult = -1
-        #self.ship1.moveTo(QPointF(self.r.left() + self.xres * self.factor*spin*15,-1*self.yres * self.fn(self.factor*spin*15*math.pi/180.0)))
-        self.ship1.moveTo(QPointF(self.r.left() + self.xres * spin*15+5,-1*self.yres * self.fn((spin*15+5)*math.pi/180.0)))
-   #     self.currentTick += mult * direction
-   #     if self.currentTick > 720:
-   #         self.currentTick = 0
+        self.ship1.moveTo(QPointF(self.r.left() + self.xres * spin*15+5,-1*self.yres * self.fn((spin*self.div+5)*math.pi/180.0)))
         if spin >= 23:
             if self.factor == 1:
                 self.factor = 2
@@ -90,7 +81,5 @@ class WaveAnimation(QGraphicsObject):
 
     def paint(self, painter, option, widget):
         r = self.boundingRect()
-        painter.setPen(QPen(Qt.blue,15))
-        #painter.drawRect(r)
-        #painter.drawLine(QPointF(r.left(),r.center().y()),QPointF(r.right(),r.center().y()))
+        painter.setPen(QPen(Qt.blue,self.div))
         painter.drawPath(self.wavePath)
