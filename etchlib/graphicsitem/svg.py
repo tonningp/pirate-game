@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 from PyQt5.QtSvg import QGraphicsSvgItem,QSvgRenderer
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import (
+    Qt,
+    pyqtSlot
+    )
 
 from PyQt5.QtWidgets import (
     QGraphicsTextItem,QGraphicsItem,QGraphicsObject,QGraphicsPixmapItem,
@@ -19,13 +22,22 @@ class Item(QGraphicsSvgItem):
         return self
 
     def onLeftClick(self,f):
-    	if not hasattr(self,'leftClickF'):
-    		self.leftClickF = []
-    	self.leftClickF.append(f)
-    	return self
+        if not hasattr(self,'leftClickF'):
+            self.leftClickF = []
+        self.leftClickF.append(f)
+        return self
+
+    def onRightClick(self,f):
+        if not hasattr(self,'rightClickF'):
+            self.rightClickF = []
+        self.rightClickF.append(f)
+        return self
 
     def mousePressEvent(self,event):
-    	if hasattr(self,'leftClickF'):
-    		for f in self.leftClickF:
-    			f(event)
-    	super().mousePressEvent(event)
+        if hasattr(self,'leftClickF') and event.button() == Qt.LeftButton:
+            for f in self.leftClickF:
+                f(event)
+        if hasattr(self,'rightClickF') and event.button() == Qt.RightButton:
+            for f in self.rightClickF:
+                f(event)
+        super().mousePressEvent(event)

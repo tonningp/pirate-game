@@ -2,6 +2,7 @@
 
 import math
 import random
+import textwrap
 from etchlib.graphicsitem import svg
 from PyQt5.QtCore import(
     Qt,
@@ -14,10 +15,16 @@ from PyQt5.QtGui import(
 )
 from PyQt5.QtWidgets import (
     QWidget,
+    QPushButton,
     QGraphicsObject,
-    QGraphicsProxyWidget,
-    QGraphicsTextItem
+    QGraphicsWidget,
+    QGraphicsTextItem,
+    QGraphicsLinearLayout,
+    QVBoxLayout
     )
+class Button(QGraphicsWidget):
+    def __init__(self,text="Button",parent=None):
+        super(Button,self).__init__(parent)
 
 class Bubble(QGraphicsObject):
 
@@ -25,16 +32,46 @@ class Bubble(QGraphicsObject):
         super(Bubble, self).__init__()
         self.bubble = svg.Item(":/images/speech_bubble2.svg",scale,self)
         self.bubble.setPos(QPointF(self.boundingRect().left(),self.boundingRect().top()))
+        self.bubble.onLeftClick(self.showAnswer)
+        self.bubble.onRightClick(self.resetQuestion)
         self.questions = questions
-        self.text = QGraphicsTextItem(self)
-        displayText = "Arrr!!!<br>On September 19th,<br>we be pirates.<br>Talk Like a Pi-Rate"
-        self.text.setHtml('<div style="font-family:Comic Sans MS;">'+displayText+'</div>')
-        self.text.setPos(-75,-80)
-        #self.button = QPushButton('Button', super(Bubble,self))
+        self.question = QGraphicsTextItem(self)
+        self.answer = QGraphicsTextItem(self)
+        #self.display("Arrr!!!<br>On September 19th,<br>we be pirates.<br>Talk Like a Pi-Rate")
+        self.displayRandom()
+        self.question.setPos(-85,-70)
+        self.answer.setPos(-85,-70)
+        self.answer.hide()
         #self.button.setToolTip('This is an example button')
         #self.button.move(100,70)
 
+    def showAnswer(self,event):
+        self.question.hide()
+        self.answer.show()
 
+    def resetQuestion(self,event):
+        self.displayRandom()
+        self.question.show()
+        self.answer.hide()
+
+    def makeHtml(self,value,width=30):
+
+        # Wrap this text.
+        wrapper = textwrap.TextWrapper(width=width)
+        word_list = wrapper.wrap(text=value)
+        # Print each line.
+        text = ''
+        for element in word_list:
+            text += element+'<br>'
+        return text
+
+    def display(self,obj,text):
+        obj.setHtml('<div style="font-family:Comic Sans MS;display:block;width:200px;word-wrap:break-word;">'+self.makeHtml(text)+'</div>')
+
+    def displayRandom(self):
+        q = self.questions[random.randint(0,len(self.questions)-1)]
+        self.display(self.answer,q['answer'])
+        self.display(self.question,q['question'])
 
     def boundingRect(self):
         r = self.bubble.boundingRect()
@@ -45,4 +82,7 @@ class Bubble(QGraphicsObject):
         return self
 
     def paint(self, painter, option, widget):
-        painter.setBrush(Qt.blue)
+        pass
+        #painter.setBrush(Qt.blue)
+        #painter.drawRect(self.boundingRect())
+        #painter.drawText(self.boundingRect().bottomRight(),"Hello")

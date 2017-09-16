@@ -19,7 +19,7 @@ questions = [
 ,
 {"question":"Who is the only head basketball coach to win both an NCAA national championship and an NBA title?","answer":"Larry Brown"}
 ,
-{"question":"What is the name for a meat dish made from finely chopped raw beef often served with onion, capers, seasonings and raw egg?","answer":"Steak tartare"}
+{"question":"What is the name for a meat dish made from finely chopped raw beef often served with onion, capers, seasonings and raw egg?","answer":"Steak tartar"}
 ,
 {"question":"What is the acronym for the intergovernmental military alliance based on the North Atlantic Treaty, signed in 1949?","answer":"NATO"}
 ,
@@ -201,7 +201,7 @@ questions = [
 ,
 {"question":"How many pairs of chromosomes are in found in the average human?","answer":"Twenty-three"}
 ,
-{"question":"\"Stairway to Heavan\" a song by English rock band Led Zeppelin was originally released on which of their albums?","answer":"Their untitled fourth studio album commonly referred to as \"Led Zeppelin IV\"."}
+{"question":"\"Stairway to Heaven\" a song by English rock band Led Zeppelin was originally released on which of their albums?","answer":"Their untitled fourth studio album commonly referred to as \"Led Zeppelin IV\"."}
 ,
 {"question":"The first human-made object to land on the moon was launched by what country?","answer":"The Soviet Union"}
 ,
