@@ -2,7 +2,9 @@
 import sys
 import resources
 from questions import questions
-from etchlib.serialcomm import SerialManager
+from etchlib.serialcomm import (
+    EventEmitter,
+    SerialManager)
 from PyQt5.QtCore import (
         Qt,
         QTime,
@@ -61,6 +63,11 @@ http://www.python-course.eu/index.php
             p = self.ship1.mapToScene(event.pos())
             print('ship1 scenePos clicked {0},{1}'.format(p.x(),p.y()))
 
+    def spin(self,i):
+        self.cutlass1.spin()
+
+    def buttonPress(self,b):
+        print('button:{0}'.format(b))
 
     def loadMainView(self):
         from etchlib.scenes.main import Scene as MScene 
@@ -148,5 +155,11 @@ if __name__ == '__main__':
     now = QTime.currentTime()
     qsrand(now.msec())
     app = QApplication(sys.argv)
+    sreader = SerialManager()
+    sreader.setEmitter(EventEmitter())
+    sreader.finished.connect(app.exit)
     win = App("Talk Like a Pi-Rate Day")
+    sreader.setPlatterHandler(win.spin)    
+    sreader.setButtonHandler(win.buttonPress)   
+    sreader.start()
     sys.exit(app.exec_())
