@@ -2,6 +2,7 @@
 import sys
 import resources
 from questions import questions
+from dialogs.treasure import Dialog
 from etchlib.serialcomm import (
     EventEmitter,
     SerialManager)
@@ -69,6 +70,24 @@ http://www.python-course.eu/index.php
     def buttonPress(self,b):
         print('button:{0}'.format(b))
 
+    def player1Point(self,event):
+        self.player1.addPoint()
+
+    def player2Point(self,event):
+        self.player2.addPoint()
+
+    def player3Point(self,event):
+        self.player3.addPoint()
+
+    def resetPlayers(self,event):
+        self.player1.reset()
+        #self.player2.reset()
+        self.player3.reset()
+
+    def prizeNumberHandler(self,number):
+        #print(self.cutlass1.prizes[self.cutlass1.randomNumber]['prize'])
+        pass
+
     def loadMainView(self):
         from etchlib.scenes.main import Scene as MScene 
         from etchlib.views.mainview import View as MainView
@@ -77,6 +96,7 @@ http://www.python-course.eu/index.php
         from etchlib.graphicsitem.speechbubble import Bubble
         from etchlib.graphicsitem.waveanimation import WaveAnimation
         from etchlib.graphicsitem.player import Item as Player
+        from etchlib.graphicsitem.treasurechest import Item as TreasureChest
 
         from gameitems.wordboard import WordBoard
         scene = MScene(QRectF(-self.size().width()/2,-self.size().height()/2,self.size().width(),self.size().height()))
@@ -84,30 +104,41 @@ http://www.python-course.eu/index.php
         #self.treasure_map.movable()
         self.treasure_map.setPos(QPointF(-self.size().width()/2,-self.size().height()/2))
         self.pirate = SvgItem(":/images/Pirate.svg",0.75)
-        self.player1 = Player(":/images/Skull_and_crossbones.svg",0.5)
+        self.pirate.setPos(QPointF(-self.size().width()/2+75,50))
+        self.treasurechest = TreasureChest(0.25)
+        self.treasurechest.setPos(QPointF(-self.size().width()/2+100,50))
+        self.treasurechest.movable()
+        self.treasurechest.setZValue(999)
+        self.player1 = Player(":/images/player1_sb.svg",0.5)
         self.player1.movable()
-        self.player2 = Player(":/images/Skull_and_crossbones.svg",0.5)
-        self.player2.movable()
-        self.player2.setPos(QPointF(self.player1.boundingRect().right()*self.player1.scale,self.player1.pos().y()))
-        self.player3 = Player(":/images/Skull_and_crossbones.svg",0.5)
+        self.player1.setZValue(999)
+        self.player1.setPos(QPointF(self.player1.pos().x()-200,self.player1.pos().y()+100))
+        # self.player2 = Player(":/images/player2_sb.svg",0.3)
+        # self.player2.movable()
+        # self.player2.setZValue(999)
+        # self.player2.setPos(QPointF(self.player1.pos().x()+self.player1.boundingRect().right()*self.player1.scale,self.player1.pos().y()))
+        self.player3 = Player(":/images/player3_sb.svg",0.5)
         self.player3.movable()
-        self.player3.setPos(QPointF(self.player2.boundingRect().right()*self.player2.scale*2,self.player2.pos().y()))
+        self.player3.setZValue(999)
+        self.player3.setPos(QPointF(self.player1.pos().x()+self.player1.boundingRect().right()*self.player1.scale,self.player1.pos().y()))
+        self.player1.addWatch(self.player3)
+        self.player3.addWatch(self.player1)
         self.speechbubble = Bubble(questions)
         transform = QTransform()
         transform.scale(3.5, 2.5)
         self.speechbubble.setTransform(transform);
-        self.speechbubble.movable()
+        #self.speechbubble.movable()
         self.speechbubble.setPos(QPointF(-self.size().width()/2+2*self.pirate.boundingRect().width()+25,-100))
-        self.pirate.setPos(QPointF(-self.size().width()/2+75,50))
         self.cutlass1 = Spinner(":/images/cutlass1.svg",0.75)
         self.cutlass1.movable(True)
         self.cutlass1.setPos(QPointF(self.size().width()/4-50,-self.size().height()/2 + 100))
+        self.cutlass1.connectFunc(self.prizeNumberHandler)
         #self.cutlass1.randomSpin()
         self.pirate.onLeftClick(lambda x: self.cutlass1.spin())
         scene.addItem(self.treasure_map)
         scene.addItem(self.pirate)
         scene.addItem(self.player1)
-        scene.addItem(self.player2)
+        # scene.addItem(self.player2)
         scene.addItem(self.player3)
         scene.addItem(self.speechbubble)
         scene.addItem(self.cutlass1)
@@ -123,6 +154,7 @@ http://www.python-course.eu/index.php
         view.setScene(scene)
         vbox = QVBoxLayout()
         vbox.addWidget(view)
+        self.treasuredialog = Dialog(self) 
         self.setCentralWidget(view)
 
     def run_code(self):
@@ -132,11 +164,14 @@ http://www.python-course.eu/index.php
         self.printPDF.emit()
 
     def help(self):
-        print("Help")
+        dialog = QMessageBox.about(self,"About Talk Like a Pirate","Proudly developed by Paul Tonning (CIS) and Darrel Harriman (Electronics)")
+
+    def showTreasure(self):
+        self.treasuredialog.setWindowTitle(self.cutlass1.prizes[self.cutlass1.randomNumber]['prize'])    
+        self.treasuredialog.show()
 
     def initUI(self):
         self.setWindowTitle(self.title)
- 
         mainMenu = self.menuBar() 
         fileMenu = mainMenu.addMenu('File')
         gameMenu = mainMenu.addMenu('View')
@@ -148,8 +183,37 @@ http://www.python-course.eu/index.php
         exitButton.setStatusTip('Exit application')
         exitButton.triggered.connect(self.close)
         fileMenu.addAction(exitButton)
-        self.toolbar = self.addToolBar('Exit')
-        self.toolbar.addAction(exitButton)
+        #self.toolbar = self.addToolBar('Exit')
+        #self.toolbar.addAction(exitButton)
+
+        player1Button = QAction(QIcon(':/images/player1_sb.svg'), 'Player 1', self)
+        player1Button.setShortcut('Ctrl+1')
+        player1Button.setStatusTip('Add 1 to player 1')
+        player1Button.triggered.connect(self.player1Point)
+        fileMenu.addAction(player1Button)
+        self.toolbar = self.addToolBar('Player 1')
+        self.toolbar.addAction(player1Button)
+        # player2Button = QAction(QIcon(':/images/player2_sb.svg'), 'Player 1', self)
+        # player2Button.setShortcut('Ctrl+2')
+        # player2Button.setStatusTip('Add 1 to player 2')
+        # player2Button.triggered.connect(self.player2Point)
+        # fileMenu.addAction(player2Button)
+        # self.toolbar = self.addToolBar('Player 2')
+        # self.toolbar.addAction(player2Button)
+        player3Button = QAction(QIcon(':/images/player3_sb.svg'), 'Player 1', self)
+        player3Button.setShortcut('Ctrl+3')
+        player3Button.setStatusTip('Add 1 to player 3')
+        player3Button.triggered.connect(self.player3Point)
+        fileMenu.addAction(player3Button)
+        self.toolbar = self.addToolBar('Player 3')
+        self.toolbar.addAction(player3Button)
+        resetButton = QAction(QIcon(':/images/reset_sb.svg'), 'Player 1', self)
+        resetButton.setShortcut('Ctrl+R')
+        resetButton.setStatusTip('Reset Players')
+        resetButton.triggered.connect(self.resetPlayers)
+        fileMenu.addAction(resetButton)
+        self.toolbar = self.addToolBar('Reset')
+        self.toolbar.addAction(resetButton)
 
         aboutButton = QAction(QIcon(':/images/icons/about64x64.png'), 'About', self)
         aboutButton.setShortcut('F1')
@@ -161,6 +225,11 @@ http://www.python-course.eu/index.php
         mainButton.setStatusTip('Main View')
         mainButton.triggered.connect(self.loadMainView)
         gameMenu.addAction(mainButton)
+        treasureButton = QAction(QIcon(':/images/Treasure_chest.svg'), 'Treasure Chest', self)
+        treasureButton.setShortcut('Ctrl+T')
+        treasureButton.setStatusTip('TreasureChest')
+        treasureButton.triggered.connect(self.showTreasure)
+        gameMenu.addAction(treasureButton)
         self.statusBar().showMessage('Message in statusbar.')
         
 if __name__ == '__main__':

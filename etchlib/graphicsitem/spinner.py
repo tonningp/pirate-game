@@ -1,5 +1,6 @@
 import math
 import random
+from prizes import prizes
 from etchlib.graphicsitem import svg
 from PyQt5.QtCore import(
     Qt,
@@ -39,14 +40,16 @@ class Spinner(QGraphicsObject):
         self.spinCount = 48 # run for 2 periods for a longer wave
         self.currentSpin = 0
         self.div = 15
+        self.prizes = prizes
+        random.shuffle(self.prizes)
         for a in range(self.spinCount//2):
             theta = self.toRad(a*self.div + 5) 
-            textPoint = QPointF(self.center.x() + self.radius*math.cos(theta)-20,self.center.y() + self.radius*math.sin(theta)-10)
+            itemPoint = QPointF(self.center.x() + self.radius*math.cos(theta)-20,self.center.y() + self.radius*math.sin(theta)-10)
             item = QGraphicsTextItem("{0}".format(a+1),self)
             item.setFont(QFont("Comic Sans MS", 36))
             item.setDefaultTextColor(Qt.yellow)
             self.numbers.append(item)
-            item.setPos(textPoint)
+            item.setPos(itemPoint)
         for i in range(9):
             self.spin()
         self.currentSpin = 1
@@ -67,7 +70,11 @@ class Spinner(QGraphicsObject):
                         .rotate(self.spinner.rotation()+self.div) \
                         .translate(-self.spinner.scale*r.width()/2,-self.spinner.scale*r.height()/2)
         self.spinner.setTransform(transform)
+        self.randomNumber = random.randint(0,34)
+        while self.prizes[self.randomNumber]['taken']:
+            self.randomNumber = random.randint(0,34)
         self.tickSignal.emit(self.currentSpin)
+        self.numbers[self.currentSpin%(self.spinCount//2)].setPlainText("{0}".format(self.randomNumber))
         self.numbers[self.currentSpin%(self.spinCount//2)].setDefaultTextColor(Qt.yellow)
         self.currentSpin += 1
         if self.currentSpin > self.spinCount-1:
