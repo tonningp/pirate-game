@@ -1,16 +1,9 @@
 #!/usr/bin/env python3
 TITLE="Pi-Day"
 import sys
-import math
-import asyncio
-import datetime
-import random
-import websockets
 import resources
 from questions import questions
 from dialogs.treasure import Dialog
-
-import etchlib.websocketmanager
 from etchlib.serialcomm import (
     EventEmitter,
     SerialManager)
@@ -36,7 +29,6 @@ from PyQt5.QtWidgets import (
         QVBoxLayout,
         QHBoxLayout,
         QStyleFactory,
-        QGraphicsProxyWidget,
         QWidget,
         QFrame,
         QStyle,
@@ -58,6 +50,7 @@ http://www.python-course.eu/index.php
     showEditor = pyqtSignal()
     hideEditor = pyqtSignal()
     runCode = pyqtSignal()
+    printPDF = pyqtSignal()
 
     def __init__(self,title):
         super().__init__()
@@ -102,34 +95,64 @@ http://www.python-course.eu/index.php
         from etchlib.scenes.main import Scene as MScene 
         from etchlib.views.mainview import View as MainView
         from etchlib.graphicsitem.svg import Item as SvgItem
-        from etchlib.widgets.circledisplay import Circle
-        from etchlib.widgets.linewidget import Line
-        from etchlib.widgets.questionwidget import Question
+        from etchlib.graphicsitem.spinner import Spinner
+        from etchlib.graphicsitem.speechbubble import Bubble
         from etchlib.graphicsitem.waveanimation import WaveAnimation
         from etchlib.graphicsitem.player import Item as Player
+        from etchlib.graphicsitem.treasurechest import Item as TreasureChest
 
+        from gameitems.wordboard import WordBoard
         scene = MScene(QRectF(-self.size().width()/2,-self.size().height()/2,self.size().width(),self.size().height()))
-        objsize = 800
+        self.treasure_map = SvgItem(":/images/Treasure_map.svg",13.0)
+        #self.treasure_map.movable()
+        self.treasure_map.setPos(QPointF(-self.size().width()/2,-self.size().height()/2))
+        self.pirate = SvgItem(":/images/Pirate.svg",0.75)
+        self.pirate.setPos(QPointF(-self.size().width()/2+75,50))
+        self.treasurechest = TreasureChest(0.25)
+        self.treasurechest.setPos(QPointF(-self.size().width()/2+100,50))
+        self.treasurechest.movable()
+        self.treasurechest.setZValue(999)
+        self.player1 = Player(":/images/player1_sb.svg",0.5)
+        self.player1.movable()
+        self.player1.setZValue(999)
+        self.player1.setPos(QPointF(self.player1.pos().x()-200,self.player1.pos().y()+100))
+        # self.player2 = Player(":/images/player2_sb.svg",0.3)
+        # self.player2.movable()
+        # self.player2.setZValue(999)
+        # self.player2.setPos(QPointF(self.player1.pos().x()+self.player1.boundingRect().right()*self.player1.scale,self.player1.pos().y()))
+        self.player3 = Player(":/images/player3_sb.svg",0.5)
+        self.player3.movable()
+        self.player3.setZValue(999)
+        self.player3.setPos(QPointF(self.player1.pos().x()+self.player1.boundingRect().right()*self.player1.scale,self.player1.pos().y()))
+        self.player1.addWatch(self.player3)
+        self.player3.addWatch(self.player1)
+        self.speechbubble = Bubble(questions)
+        transform = QTransform()
+        transform.scale(3.5, 2.5)
+        self.speechbubble.setTransform(transform);
+        #self.speechbubble.movable()
+        self.speechbubble.setPos(QPointF(-self.size().width()/2+2*self.pirate.boundingRect().width()+25,-100))
+        self.cutlass1 = Spinner(":/images/cutlass1.svg",0.75)
+        self.cutlass1.movable(True)
+        self.cutlass1.setPos(QPointF(self.size().width()/4-50,-self.size().height()/2 + 100))
+        self.cutlass1.connectFunc(self.prizeNumberHandler)
+        #self.cutlass1.randomSpin()
+        self.pirate.onLeftClick(lambda x: self.cutlass1.spin())
+        scene.addItem(self.treasure_map)
+        scene.addItem(self.pirate)
+        scene.addItem(self.player1)
+        # scene.addItem(self.player2)
+        scene.addItem(self.player3)
+        scene.addItem(self.speechbubble)
+        scene.addItem(self.cutlass1)
+        #self.wordboard = WordBoard({"word1":"circumference / diameter"})
+        #self.wordboard.setPos(QPointF(self.cutlass1.pos().x()+self.cutlass1.boundingRect().width()+50,-350))
+        #scene.addItem(self.wordboard)
         self.wave = WaveAnimation()
+        self.cutlass1.connectFunc(self.wave.updateTick)
         self.wave.movable(True)
-        q = Question(1000)
-        #l = Line(objsize)
-        #l.connectFunc(self.circle.valueChanged)
-        #self.line = scene.addWidget(l)
-        #self.line.setFlag(QGraphicsProxyWidget.ItemIsMovable,True)
-        #self.line.resize(math.pi*objsize,objsize/8)
-        #self.line.setPos(QPointF(-math.pi*objsize/2,objsize/2))
-        self.circle = Circle(objsize)
-        self.circle.movable(True).selectable(True)
-        self.question = scene.addWidget(q)
-        self.question.setFlag(QGraphicsProxyWidget.ItemIsMovable,True)
-        self.question.resize(750,500)
-        self.question.setPos(QPointF(-1250,-750))
-        q.connectFunc(self.circle.valueChanged)
-        q.random_question()
-        scene.addItem(self.circle)
-        self.circle.update()
-        #scene.addItem(self.wave)
+        scene.addItem(self.wave)
+        self.wave.setPos(QPointF(self.pirate.boundingRect().right()-200,400))
         view = MainView(self)
         view.setScene(scene)
         vbox = QVBoxLayout()
@@ -143,8 +166,11 @@ http://www.python-course.eu/index.php
     def run_code(self):
         self.runCode.emit()
 
+    def printPDFEmit(self):
+        self.printPDF.emit()
+
     def help(self):
-        dialog = QMessageBox.about(self,"About Pi Day Program","Proudly developed by Paul Tonning (CIS) and Darrel Harriman (Electronics)")
+        dialog = QMessageBox.about(self,"About Talk Like a Pirate","Proudly developed by Paul Tonning (CIS) and Darrel Harriman (Electronics)")
 
     def showTreasure(self):
         self.treasuredialog.setWindowTitle(self.cutlass1.prizes[self.cutlass1.randomNumber]['prize'])    
@@ -212,9 +238,6 @@ http://www.python-course.eu/index.php
         # gameMenu.addAction(treasureButton)
         # self.statusBar().showMessage('Message in statusbar.')
 
-    def data_slot(self,message):
-        print('In QMainWindow',message)
-
 class MyTableWidget(QWidget): 
     def __init__(self, parent):   
         super(QWidget, self).__init__(parent)
@@ -245,9 +268,7 @@ class MyTableWidget(QWidget):
         print("\n")
         for currentQTableWidgetItem in self.tableWidget.selectedItems():
             print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())
-#!/usr/bin/env python3
-
-
+         
 if __name__ == '__main__':
     now = QTime.currentTime()
     qsrand(now.msec())
@@ -256,10 +277,6 @@ if __name__ == '__main__':
     #sreader.setEmitter(EventEmitter())
     #sreader.finished.connect(app.exit)
     win = App(TITLE)
-    ws_manager = etchlib.websocketmanager.WebSocketManager(asyncio.get_event_loop())
-    ws_manager.finished.connect(app.exit)
-    ws_manager.connect_data_slot(win.data_slot)
-    ws_manager.start()
     #sreader.setPlatterHandler(win.spin)    
     #sreader.setButtonHandler(win.buttonPress)   
     #sreader.start()
