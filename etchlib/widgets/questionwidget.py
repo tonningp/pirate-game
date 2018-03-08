@@ -40,6 +40,8 @@ data = [
 {   
     'text':'Find the <span style="font-weight:bold;">circumference</span>. Use 3.14 as an approximation for π.<br> A correct answer would look like 4.78 in.',
     'type' : 'circum-approx',
+    'measure' : 'circumference',
+    'precision' : 'approximation',
     'diameter' : False,
     'units' : 'in',
     'radius' : 0,
@@ -48,6 +50,8 @@ data = [
 {   
     'text':'Find the <span style="font-weight:bold;">circumference</span> in terms of π and the unit of measurement.<br>Type "pi" in for π so that "7.00π m" would look like "7.00pi m".',
     'type' : 'circum-exact',
+    'measure' : 'circumference',
+    'precision' : 'exact',
     'diameter' : False,
     'units' : 'in',
     'radius' : 0,
@@ -56,6 +60,8 @@ data = [
 {   
     'text':'Find the <span style="font-weight:bold;">area</span> in terms of π and the unit of measurement.<br>Type "pi" in for π so that "56.25π m<sup>2</sup>" would look like "56.25pi m^2".',
     'type' : 'area-exact',
+    'measure' : 'area',
+    'precision' : 'exact',
     'diameter' : False,
     'units' : 'in',
     'radius' : 0,
@@ -64,6 +70,8 @@ data = [
 {   
     'text':'Find the <span style="font-weight:bold;">area</span>. Use 3.14 as an approximation for π.<br> A correct answer would look like 314.00 in^2.',
     'type' : 'area-approx',
+    'measure' : 'area',
+    'precision' : 'approximation',
     'diameter' : False,
     'units' : 'in',
     'radius' : 0,
@@ -106,11 +114,11 @@ class Question(QWidget):
             data[index]['answer'] = '{0:.2f}pi {1}'.format(float((data[index]['radius']/(data[index]['diameter']+1))**2),'{0}^2'.format(data[index]['units']))
         elif data[index]['type'] == 'area-approx':
             data[index]['answer'] = '{0:.2f} {1}'.format((data[index]['radius'] /(data[index]['diameter']+1)) ** 2*3.14,'{0}^2'.format(data[index]['units']))
-        self.question_label.tmpl = '<span style="font-size:48px;font-color:blue;">{0}</span>'
+        self.question_label.tmpl = '<span style="font-size:72px;font-color:blue;">{0}</span>'
         self.question_label.setText(self.question_label.tmpl.format(data[index]['text']))
-        self.answer1_label.tmpl = '<span style="font-size:48px;font-color:blue;">{0}</span>'
+        self.answer1_label.tmpl = '<span style="font-size:72px;font-color:blue;">{0}</span>'
         self.answer1_label.setText(self.answer1_label.tmpl.format(data[index]['radius'])+' '+str(data[index]['diameter']))
-        self.answer2_label.tmpl = '<span style="font-size:48px;font-color:blue;">{0}</span>'
+        self.answer2_label.tmpl = '<span style="font-size:72px;font-color:blue;">{0}</span>'
         self.answer2_label.setText(self.answer2_label.tmpl.format(data[index]['answer']))
         self.question_index = index
         self.clickSignal.emit(data[index])

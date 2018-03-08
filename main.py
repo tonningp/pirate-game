@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 TITLE="Pi-Day"
+NUMBER_OF_PLAYERS = 5
+TIMER_INTERVAL = 10000
 import sys
 import math
 import asyncio
@@ -17,6 +19,7 @@ from etchlib.serialcomm import (
 from PyQt5.QtCore import (
         Qt,
         QTime,
+        QTimer,
         pyqtSignal,
         qsrand,
         QPointF,
@@ -58,6 +61,7 @@ http://www.python-course.eu/index.php
     showEditor = pyqtSignal()
     hideEditor = pyqtSignal()
     runCode = pyqtSignal()
+    produceSig = pyqtSignal(dict)
 
     def __init__(self,title):
         super().__init__()
@@ -103,31 +107,57 @@ http://www.python-course.eu/index.php
         from etchlib.views.mainview import View as MainView
         from etchlib.graphicsitem.svg import Item as SvgItem
         from etchlib.widgets.circledisplay import Circle
+        from etchlib.widgets.radian import Spinner
+        from etchlib.widgets.leaderboard import Leaderboard
         from etchlib.widgets.linewidget import Line
+        from etchlib.widgets.log import Log
+        from etchlib.widgets.debrujn import Debrujn
         from etchlib.widgets.questionwidget import Question
         from etchlib.graphicsitem.waveanimation import WaveAnimation
         from etchlib.graphicsitem.player import Item as Player
 
         scene = MScene(QRectF(-self.size().width()/2,-self.size().height()/2,self.size().width(),self.size().height()))
-        objsize = 800
+        objsize = 1200
+        self.timer_interval = TIMER_INTERVAL
+        self.circle = Circle(objsize)
+        self.spinner = Spinner(objsize)
         self.wave = WaveAnimation()
         self.wave.movable(True)
-        q = Question(1000)
+        #q = Question(objsize)
         #l = Line(objsize)
         #l.connectFunc(self.circle.valueChanged)
+        #l.connectFunc(self.spinner.valueChanged)
         #self.line = scene.addWidget(l)
         #self.line.setFlag(QGraphicsProxyWidget.ItemIsMovable,True)
         #self.line.resize(math.pi*objsize,objsize/8)
         #self.line.setPos(QPointF(-math.pi*objsize/2,objsize/2))
-        self.circle = Circle(objsize)
+        self.leader = Leaderboard(NUMBER_OF_PLAYERS,objsize)
+        self.produceSig.connect(self.leader.questionChanged)
+        self.leaderwidget = scene.addWidget(self.leader)
+        self.leaderwidget.resize(objsize,objsize/2)
+        self.leaderwidget.setPos(QPointF(0,-0.5*scene.height()))
+        self.debrujn = Debrujn(objsize*0.5)
         self.circle.movable(True).selectable(True)
-        self.question = scene.addWidget(q)
-        self.question.setFlag(QGraphicsProxyWidget.ItemIsMovable,True)
-        self.question.resize(750,500)
-        self.question.setPos(QPointF(-1250,-750))
-        q.connectFunc(self.circle.valueChanged)
-        q.random_question()
+        self.circle.setPos(QPointF(-0.25*scene.width(),0))
+        self.debrujn.movable(True).selectable(True)
+
+        # self.log = Log(objsize)
+        # self.logwidget = scene.addWidget(self.log)
+        # self.logwidget.resize(objsize,objsize/2)
+        # self.logwidget.setPos(QPointF(0,0))
+
+        #self.question = scene.addWidget(q)
+        #self.question.setFlag(QGraphicsProxyWidget.ItemIsMovable,True)
+        #self.question.resize(3*objsize/4,objsize/2)
+        #self.question.setPos(QPointF(-5*objsize/4,-0.7*objsize))
+        #q.connectFunc(self.circle.valueChanged)
+        #q.random_question()
         scene.addItem(self.circle)
+        scene.addItem(self.spinner)
+        scene.addItem(self.debrujn)
+        #scene.addItem(self.wave)
+        #self.debrujn.hide()
+        self.spinner.hide()
         self.circle.update()
         #scene.addItem(self.wave)
         view = MainView(self)
@@ -136,8 +166,9 @@ http://www.python-course.eu/index.php
         vbox.addWidget(view)
         self.treasuredialog = Dialog(self) 
         self.setCentralWidget(view)
-        #self.table_widget = MyTableWidget(self)
-        #self.setCentralWidget(self.table_widget)
+        self.game_timer = QTimer(self)
+        self.game_timer.timeout.connect(self.gameTimer_slot)
+        self.game_timer.start(self.timer_interval)
  
 
     def run_code(self):
@@ -213,7 +244,12 @@ http://www.python-course.eu/index.php
         # self.statusBar().showMessage('Message in statusbar.')
 
     def data_slot(self,message):
-        print('In QMainWindow',message)
+        #self.log.setText(str(message))
+        self.leader.processMessage(message)
+
+    def gameTimer_slot(self):
+        question = self.circle.random_question(self.produceSig)
+        
 
 class MyTableWidget(QWidget): 
     def __init__(self, parent):   
@@ -245,7 +281,6 @@ class MyTableWidget(QWidget):
         print("\n")
         for currentQTableWidgetItem in self.tableWidget.selectedItems():
             print(currentQTableWidgetItem.row(), currentQTableWidgetItem.column(), currentQTableWidgetItem.text())
-#!/usr/bin/env python3
 
 
 if __name__ == '__main__':
@@ -259,6 +294,9 @@ if __name__ == '__main__':
     ws_manager = etchlib.websocketmanager.WebSocketManager(asyncio.get_event_loop())
     ws_manager.finished.connect(app.exit)
     ws_manager.connect_data_slot(win.data_slot)
+    win.produceSig.connect(ws_manager.set_data_slot)
+    #ws_manager.connect_producer_slot(win.gameTimer_slot)
+    #ws_manager.set_producer(win.circle)
     ws_manager.start()
     #sreader.setPlatterHandler(win.spin)    
     #sreader.setButtonHandler(win.buttonPress)   
